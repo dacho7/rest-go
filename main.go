@@ -63,13 +63,30 @@ func getTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, task := range tasks {
+	for index, task := range tasks {
 		if task.Id == idTask {
 			w.Header().Set("Content-Type", "application/json")
+			fmt.Print(index)
 			json.NewEncoder(w).Encode(task)
 		}
 	}
 
+}
+
+func deleteTask(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	idTask, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		fmt.Fprint(w, "Invalid id")
+		return
+	}
+
+	for index, task := range tasks {
+		if task.Id == idTask {
+			tasks = append(tasks[:index], tasks[index+1:]...)
+			json.NewEncoder(w).Encode(tasks)
+		}
+	}
 }
 
 func main() {
@@ -78,6 +95,7 @@ func main() {
 	router.HandleFunc("/", indexRoute)
 	router.HandleFunc("/tasks", getTasks)
 	router.HandleFunc("/createtask", createTask).Methods("POST")
+	router.HandleFunc("/gettask/{id}", getTask).Methods("GET")
 	router.HandleFunc("/deletetask/{id}", getTask).Methods("DELETE")
 
 	log.Fatal(http.ListenAndServe(":3010", router))
