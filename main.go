@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -24,6 +25,10 @@ var tasks = allTasks{
 		Name:    "lavar platos",
 		Content: "No olvidar las ollas",
 	},
+}
+
+func indexRoute(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Welcome to my Api")
 }
 
 func getTasks(w http.ResponseWriter, r *http.Request) {
@@ -48,8 +53,23 @@ func createTask(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(tasks)
 }
 
-func indexRoute(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Welcome to my Api")
+func getTask(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	idTask, err := strconv.Atoi(vars["id"])
+
+	if err != nil {
+		fmt.Fprint(w, "Invalid Id")
+		return
+	}
+
+	for _, task := range tasks {
+		if task.Id == idTask {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(task)
+		}
+	}
+
 }
 
 func main() {
@@ -58,6 +78,7 @@ func main() {
 	router.HandleFunc("/", indexRoute)
 	router.HandleFunc("/tasks", getTasks)
 	router.HandleFunc("/createtask", createTask).Methods("POST")
+	router.HandleFunc("/deletetask/{id}", getTask).Methods("DELETE")
 
 	log.Fatal(http.ListenAndServe(":3010", router))
 }
