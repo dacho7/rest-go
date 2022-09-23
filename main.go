@@ -84,7 +84,7 @@ func deleteTask(w http.ResponseWriter, r *http.Request) {
 	for index, task := range tasks {
 		if task.Id == idTask {
 			tasks = append(tasks[:index], tasks[index+1:]...)
-			json.NewEncoder(w).Encode(tasks)
+			json.NewEncoder(w).Encode(task)
 		}
 	}
 }
@@ -96,7 +96,7 @@ func main() {
 	router.HandleFunc("/tasks", getTasks)
 	router.HandleFunc("/createtask", createTask).Methods("POST")
 	router.HandleFunc("/gettask/{id}", getTask).Methods("GET")
-	router.HandleFunc("/deletetask/{id}", getTask).Methods("DELETE")
+	router.HandleFunc("/deletetask/{id}", deleteTask).Methods("DELETE")
 
 	log.Fatal(http.ListenAndServe(":3010", router))
 }
